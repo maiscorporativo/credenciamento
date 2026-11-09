@@ -18,6 +18,7 @@ export default function Balcao() {
   const [modal, setModal] = useState(null); // {mode:'new'|'edit', data}
   const [msg, setMsg] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [marked, setMarked] = useState(() => new Map()); // impressão em lote: id -> participante (vale entre buscas)
   const searchRef = useRef();
 
   const flash = (text, tone = 'ok') => { setMsg({ text, tone }); setTimeout(() => setMsg(null), 3500); };
@@ -57,6 +58,27 @@ export default function Balcao() {
       flash(`Etiqueta de ${fullName(cur)} enviada para a impressora.`);
       setQ('');
       searchRef.current?.focus();
+    } catch (e) { flash(e.message, 'err'); } finally { setBusy(false); }
+  };
+
+  const toggleMark = (p) => setMarked((m) => { const n = new Map(m); if (n.has(p.id)) n.delete(p.id); else n.set(p.id, p); return n; });
+  const allMarked = results.rows.length > 0 && results.rows.every((p) => marked.has(p.id));
+  const markAll = () => setMarked((m) => { const n = new Map(m); results.rows.forEach((p) => (allMarked ? n.delete(p.id) : n.set(p.id, p))); return n; });
+
+  const printMarked = async () => {
+    if (!tpl || !marked.size) return;
+    setBusy(true);
+    try {
+      const list = await api('/participants/by-ids', { method: 'POST', body: { ids: [...marked.keys()] } });
+      const again = list.filter((p) => p.print_count > 0);
+      if (again.length && !confirm(`${again.length} de ${list.length} já tiveram etiqueta impressa (${again.slice(0, 5).map(fullName).join(', ')}${again.length > 5 ? '…' : ''}). Imprimir todas mesmo assim?`)) return;
+      await printLabels(tpl, list, meta.event);
+      const r = await api('/print', { method: 'POST', body: { ids: list.map((p) => p.id) } });
+      const upd = (p) => (marked.has(p.id) ? { ...p, print_count: p.print_count + 1, last_print_at: r.at, checkin_at: p.checkin_at || r.at } : p);
+      setResults((x) => ({ ...x, rows: x.rows.map(upd) }));
+      setSel((x) => (x ? upd(x) : x));
+      flash(`${list.length} etiqueta(s) enviada(s) para a impressora.`);
+      setMarked(new Map());
     } catch (e) { flash(e.message, 'err'); } finally { setBusy(false); }
   };
 
@@ -100,11 +122,24 @@ export default function Balcao() {
               placeholder="Nome, CPF, e-mail, empresa ou bipe o QR Code"
               className="w-full rounded-2xl border-2 border-slate-200 bg-white py-4 pl-12 pr-4 text-lg outline-none focus:border-brand-600" />
           </div>
-          <div className="mt-2 text-xs text-slate-500">{q ? `${results.total} resultado(s)` : 'Digite para buscar. Enter seleciona o primeiro. F2 imprime.'}</div>
+          <div className="mt-2 flex items-center justify-between gap-2 text-xs text-slate-500">
+            <span>{q ? `${results.total} resultado(s)` : 'Digite para buscar. Enter seleciona o primeiro. F2 imprime.'}</span>
+            {results.rows.length > 1 && <button className="font-semibold text-brand-700 hover:underline" onClick={markAll}>{allMarked ? 'Desmarcar todos' : 'Marcar todos'}</button>}
+          </div>
+          {marked.size > 0 && (
+            <div className="mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-brand-900 px-3 py-2 text-white">
+              <span className="flex-1 text-sm"><b>{marked.size}</b> marcado(s) para imprimir</span>
+              <button className="btn bg-lime py-1.5 text-brand-900 hover:bg-white" onClick={printMarked} disabled={busy || !tpl}><Printer size={16} /> {busy ? 'Imprimindo…' : 'Imprimir marcados'}</button>
+              <button className="rounded px-2 py-1 text-sm text-white/80 hover:bg-white/10" onClick={() => setMarked(new Map())}>Limpar</button>
+            </div>
+          )}
           <ul className="mt-3 space-y-2 overflow-y-auto">
             {results.rows.map((p) => (
-              <li key={p.id}>
-                <button onClick={() => select(p)} className={`card flex w-full items-center gap-3 p-3 text-left hover:ring-brand-500 ${sel?.id === p.id ? 'ring-2 ring-brand-600' : ''}`}>
+              <li key={p.id} className="flex items-stretch gap-2">
+                <label className={`card grid w-12 shrink-0 cursor-pointer place-items-center ${marked.has(p.id) ? 'ring-2 ring-brand-600' : ''}`} title="Marcar para impressão em lote">
+                  <input type="checkbox" className="h-5 w-5 accent-brand-700" checked={marked.has(p.id)} onChange={() => toggleMark(p)} aria-label={`Marcar ${fullName(p)} para imprimir`} />
+                </label>
+                <button onClick={() => select(p)} className={`card flex min-w-0 flex-1 items-center gap-3 p-3 text-left hover:ring-brand-500 ${sel?.id === p.id ? 'ring-2 ring-brand-600' : ''}`}>
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-semibold">{fullName(p)}</div>
                     <div className="truncate text-sm text-slate-500">{p.empresa || '—'} · {fmtCpf(p.cpf)}</div>

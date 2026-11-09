@@ -448,8 +448,13 @@ mauticRoutes(app, { ADMIN, wrap });
 // ---------------------------------------------------------------- front-end compilado
 const dist = path.join(ROOT, 'dist');
 if (fs.existsSync(dist)) {
-  app.use(express.static(dist));
-  app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(dist, 'index.html')));
+  // arquivos de /assets têm nome com hash: podem ficar em cache. O index.html nunca, para cada atualização aparecer na hora.
+  const noCache = (res) => res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  app.use(express.static(dist, {
+    index: false,
+    setHeaders: (res, file) => { if (file.includes(`${path.sep}assets${path.sep}`)) res.set('Cache-Control', 'public, max-age=31536000, immutable'); else noCache(res); },
+  }));
+  app.get(/^(?!\/api).*/, (req, res) => { noCache(res); res.sendFile(path.join(dist, 'index.html')); });
 }
 
 app.use((e, req, res, _next) => { console.error(e); err(res, 500, e.message || 'Erro interno'); });

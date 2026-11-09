@@ -114,5 +114,5 @@ export function tx(fn) {
   catch (e) { db.exec('ROLLBACK'); throw e; }
 }
 
-// categoria antiga "STAFF" passou a se chamar "STAFF SIRAN SUMMIT"
-db.prepare("UPDATE participants SET categoria = 'STAFF SIRAN SUMMIT' WHERE categoria = 'STAFF'").run();
+// categorias antigas "STAFF" e "STAFF SIRAN SUMMIT" passaram a se chamar "ORGANIZADOR"
+db.prepare("UPDATE participants SET categoria = 'ORGANIZADOR' WHERE categoria IN ('STAFF', 'STAFF SIRAN SUMMIT')").run();

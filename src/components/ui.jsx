@@ -67,7 +67,7 @@ export function LabelPreview({ tpl, participant, scale = 1, className = '' }) {
 /** Interruptor grande "EXPOSITOR" — o check pedido para o balcão */
 const QUICK_CATS = [
   { c: 'EXPOSITOR', label: 'É expositor', on: 'border-amber-500 bg-amber-50', box: 'border-amber-500 bg-amber-500' },
-  { c: 'STAFF SIRAN SUMMIT', label: 'É staff', on: 'border-violet-500 bg-violet-50', box: 'border-violet-500 bg-violet-500' },
+  { c: 'ORGANIZADOR', label: 'É organizador', on: 'border-violet-500 bg-violet-50', box: 'border-violet-500 bg-violet-500' },
   { c: 'IMPRENSA', label: 'É imprensa', on: 'border-slate-600 bg-slate-100', box: 'border-slate-600 bg-slate-600' },
 ];
 

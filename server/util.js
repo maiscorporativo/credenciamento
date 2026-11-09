@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-export const CATEGORIAS = ['VISITANTE', 'EXPOSITOR', 'STAFF SIRAN SUMMIT', 'PALESTRANTE', 'IMPRENSA', 'ORGANIZAÇÃO', 'VIP'];
+export const CATEGORIAS = ['VISITANTE', 'EXPOSITOR', 'ORGANIZADOR', 'PALESTRANTE', 'IMPRENSA', 'ORGANIZAÇÃO', 'VIP'];
 export const ROLES = ['participante', 'scanner', 'balcao', 'admin'];
 
 export const onlyDigits = (s) => String(s ?? '').replace(/\D/g, '');

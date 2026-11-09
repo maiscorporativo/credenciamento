@@ -65,17 +65,30 @@ export function LabelPreview({ tpl, participant, scale = 1, className = '' }) {
 }
 
 /** Interruptor grande "EXPOSITOR" — o check pedido para o balcão */
+const QUICK_CATS = [
+  { c: 'EXPOSITOR', label: 'É expositor', on: 'border-amber-500 bg-amber-50', box: 'border-amber-500 bg-amber-500' },
+  { c: 'STAFF SIRAN SUMMIT', label: 'É staff', on: 'border-violet-500 bg-violet-50', box: 'border-violet-500 bg-violet-500' },
+  { c: 'IMPRENSA', label: 'É imprensa', on: 'border-slate-600 bg-slate-100', box: 'border-slate-600 bg-slate-600' },
+];
+
+/** Marcações rápidas de categoria: marcar uma desmarca as outras; desmarcar volta para VISITANTE */
 export function ExhibitorToggle({ categoria, onChange, disabled }) {
-  const on = categoria === 'EXPOSITOR';
   return (
-    <button type="button" disabled={disabled} onClick={() => onChange(on ? 'VISITANTE' : 'EXPOSITOR')}
-      className={`flex w-full items-center gap-3 rounded-xl border-2 px-4 py-3 text-left transition ${on ? 'border-amber-500 bg-amber-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
-      <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-md border-2 text-sm font-black ${on ? 'border-amber-500 bg-amber-500 text-white' : 'border-slate-300'}`}>{on ? '✓' : ''}</span>
-      <span>
-        <span className="block font-bold">É expositor</span>
-        <span className="block text-xs text-slate-500">{on ? 'A etiqueta sairá com EXPOSITOR' : 'Marque para imprimir EXPOSITOR em vez de VISITANTE'}</span>
-      </span>
-    </button>
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      {QUICK_CATS.map((q) => {
+        const on = categoria === q.c;
+        return (
+          <button key={q.c} type="button" disabled={disabled} onClick={() => onChange(on ? 'VISITANTE' : q.c)}
+            className={`flex w-full items-center gap-3 rounded-xl border-2 px-3 py-3 text-left transition ${on ? q.on : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+            <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-md border-2 text-sm font-black ${on ? `${q.box} text-white` : 'border-slate-300'}`}>{on ? '✓' : ''}</span>
+            <span className="min-w-0">
+              <span className="block font-bold">{q.label}</span>
+              <span className="block text-xs text-slate-500">{on ? `Etiqueta: ${q.c}` : `Imprime ${q.c}`}</span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 

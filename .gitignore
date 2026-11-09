@@ -1,5 +1,5 @@
 node_modules
-dist
+# dist (telas compiladas) vai junto no repositório: a hospedagem não precisa rodar o build
 .env
 
 # banco de dados (contém dados pessoais dos inscritos e a senha do Mautic)

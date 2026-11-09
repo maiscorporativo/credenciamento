@@ -1,8 +1,12 @@
 import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const DATA_DIR = process.env.DATA_DIR || path.resolve('data');
+// raiz do projeto, independente da pasta de onde o servidor foi iniciado
+export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+const DATA_DIR = path.resolve(ROOT, process.env.DATA_DIR || 'data');
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
 export const db = new DatabaseSync(path.join(DATA_DIR, 'credenciamento.db'));

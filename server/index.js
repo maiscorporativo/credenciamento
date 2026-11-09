@@ -3,7 +3,7 @@ import express from 'express';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'node:fs';
-import { db, getSetting, setSetting, tx } from './db.js';
+import { db, getSetting, setSetting, tx, ROOT } from './db.js';
 import {
   CATEGORIAS, ROLES, onlyDigits, clean, slug, makeLogin, makeBadgeName, makeCode, parseConsent, extractCode,
 } from './util.js';
@@ -445,7 +445,7 @@ app.get('/api/reports/networking', ADMIN, wrap((req, res) => {
 mauticRoutes(app, { ADMIN, wrap });
 
 // ---------------------------------------------------------------- front-end compilado
-const dist = path.resolve('dist');
+const dist = path.join(ROOT, 'dist');
 if (fs.existsSync(dist)) {
   app.use(express.static(dist));
   app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(dist, 'index.html')));

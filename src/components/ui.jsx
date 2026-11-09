@@ -68,13 +68,14 @@ export function LabelPreview({ tpl, participant, scale = 1, className = '' }) {
 const QUICK_CATS = [
   { c: 'EXPOSITOR', label: 'É expositor', on: 'border-amber-500 bg-amber-50', box: 'border-amber-500 bg-amber-500' },
   { c: 'ORGANIZADOR', label: 'É organizador', on: 'border-violet-500 bg-violet-50', box: 'border-violet-500 bg-violet-500' },
+  { c: 'PALESTRANTE', label: 'É palestrante', on: 'border-rose-500 bg-rose-50', box: 'border-rose-500 bg-rose-500' },
   { c: 'IMPRENSA', label: 'É imprensa', on: 'border-slate-600 bg-slate-100', box: 'border-slate-600 bg-slate-600' },
 ];
 
 /** Marcações rápidas de categoria: marcar uma desmarca as outras; desmarcar volta para VISITANTE */
 export function ExhibitorToggle({ categoria, onChange, disabled }) {
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
       {QUICK_CATS.map((q) => {
         const on = categoria === q.c;
         return (

@@ -64,7 +64,8 @@ function auth(...roles) {
 const ANY = auth();
 const ADMIN = auth('admin');
 const DESK = auth('admin', 'balcao');
-const SCAN = auth('admin', 'scanner');
+// balcão também bipa acesso (escolhendo o espaço), para poder ser realocado durante o evento
+const SCAN = auth('admin', 'scanner', 'balcao');
 
 app.post('/api/login', wrap((req, res) => {
   const ip = req.ip;
@@ -288,7 +289,7 @@ app.post('/api/scans', SCAN, wrap((req, res) => {
   const p = db.prepare('SELECT * FROM participants WHERE code = ?').get(code);
   if (!p) return err(res, 404, `Crachá não reconhecido (${code}).`);
   const areaId = req.user.role === 'scanner' ? req.user.area_id : Number(req.body.area_id) || null;
-  if (!areaId) return err(res, 400, 'Este operador não está vinculado a nenhum espaço. Peça ao administrador.');
+  if (!areaId) return err(res, 400, req.user.role === 'scanner' ? 'Este operador não está vinculado a nenhum espaço. Peça ao administrador.' : 'Selecione o espaço antes de bipar.');
   const area = db.prepare('SELECT * FROM areas WHERE id = ?').get(areaId);
   if (!area?.ativo) return err(res, 400, 'Espaço inativo.');
 
@@ -322,7 +323,7 @@ app.get('/api/scans/recent', SCAN, wrap((req, res) => {
 }));
 
 app.delete('/api/scans/:id', SCAN, wrap((req, res) => {
-  const where = req.user.role === 'scanner' ? 'AND scanner_id = ?' : '';
+  const where = req.user.role !== 'admin' ? 'AND scanner_id = ?' : '';
   db.prepare(`DELETE FROM scans WHERE id = ? ${where}`).run(...[req.params.id, ...(where ? [req.user.id] : [])]);
   res.json({ ok: true });
 }));

@@ -132,7 +132,7 @@ export function ParticipantForm({ value, onChange, admin, areas = [] }) {
             <select className="input" value={value.role || 'participante'} onChange={set('role')}>
               <option value="participante">Participante (crachá + networking)</option>
               <option value="scanner">Leitor de acesso (bipa entradas)</option>
-              <option value="balcao">Balcão (busca e impressão)</option>
+              <option value="balcao">Balcão (impressão + bipa qualquer espaço)</option>
               <option value="admin">Administrador</option>
             </select>
           </div>

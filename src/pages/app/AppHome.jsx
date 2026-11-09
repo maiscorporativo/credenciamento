@@ -1,5 +1,5 @@
 import { NavLink, Navigate, Route, Routes, Link } from 'react-router-dom';
-import { BookUser, IdCard, LayoutDashboard, LogOut, ScanLine, QrCode } from 'lucide-react';
+import { BookUser, IdCard, LayoutDashboard, LogOut, Printer, ScanLine, QrCode } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import MeuCracha from './MeuCracha';
 import Escanear from './Escanear';
@@ -8,7 +8,7 @@ import Acesso from './Acesso';
 
 export default function AppHome() {
   const { user, logout, meta } = useAuth();
-  const canScanAccess = ['scanner', 'admin'].includes(user.role);
+  const canScanAccess = ['scanner', 'balcao', 'admin'].includes(user.role);
   const isPerson = !!user.id;
   const tabs = [
     isPerson && { to: '/app', end: true, icon: IdCard, label: 'Crachá' },
@@ -25,6 +25,7 @@ export default function AppHome() {
           <div className="truncate text-xs text-white/70">{user.nome} {user.sobrenome}</div>
         </div>
         {user.role === 'admin' && <Link to="/admin" className="rounded p-2 hover:bg-white/10" aria-label="Painel"><LayoutDashboard size={18} /></Link>}
+        {user.role === 'balcao' && <Link to="/balcao" className="rounded p-2 hover:bg-white/10" aria-label="Balcão"><Printer size={18} /></Link>}
         <button onClick={logout} className="rounded p-2 hover:bg-white/10" aria-label="Sair"><LogOut size={18} /></button>
       </header>
 

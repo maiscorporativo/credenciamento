@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, LogOut, Pencil, Printer, Search, UserPlus } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, LogOut, Pencil, Printer, ScanLine, Search, UserPlus } from 'lucide-react';
 import { api, fmtCpf, fmtDate, fullName, validCpf } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { printLabels } from '../lib/label';
@@ -86,6 +86,7 @@ export default function Balcao() {
           <div className="font-extrabold text-lime">{meta.event?.nome} · Balcão de credenciamento</div>
           <div className="text-xs text-white/60">Operador: {user.nome} {user.sobrenome}</div>
         </div>
+        <Link to="/app/acesso" className="btn bg-white/10 text-white hover:bg-white/20"><ScanLine size={18} /> Bipar acesso</Link>
         <button onClick={() => setModal({ mode: 'new', data: { ...EMPTY } })} className="btn bg-lime text-brand-900 hover:bg-white"><UserPlus size={18} /> Novo cadastro</button>
         <button onClick={logout} className="rounded p-2 hover:bg-white/10" aria-label="Sair"><LogOut size={18} /></button>
       </header>

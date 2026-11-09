@@ -1,0 +1,15 @@
+node_modules
+dist
+.env
+
+# banco de dados (contém dados pessoais dos inscritos e a senha do Mautic)
+data
+*.db
+*.db-shm
+*.db-wal
+
+# planilhas de inscritos (dados pessoais - LGPD) e arquivos de arte
+*.xlsx
+*.xls
+*.csv
+*.pdf

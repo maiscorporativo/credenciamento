@@ -108,3 +108,6 @@ export function tx(fn) {
   try { const r = fn(); db.exec('COMMIT'); return r; }
   catch (e) { db.exec('ROLLBACK'); throw e; }
 }
+
+// categoria antiga "STAFF" passou a se chamar "STAFF SIRAN SUMMIT"
+db.prepare("UPDATE participants SET categoria = 'STAFF SIRAN SUMMIT' WHERE categoria = 'STAFF'").run();

@@ -47,7 +47,7 @@ export async function exportXlsx(rows, filename, sheet = 'Dados') {
 export const CATEGORY_COLORS = {
   VISITANTE: 'bg-sky-100 text-sky-800',
   EXPOSITOR: 'bg-amber-100 text-amber-800',
-  STAFF: 'bg-violet-100 text-violet-800',
+  'STAFF SIRAN SUMMIT': 'bg-violet-100 text-violet-800',
   PALESTRANTE: 'bg-rose-100 text-rose-800',
   IMPRENSA: 'bg-slate-200 text-slate-800',
   'ORGANIZAÇÃO': 'bg-brand-100 text-brand-900',

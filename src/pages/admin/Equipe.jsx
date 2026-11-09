@@ -20,7 +20,7 @@ export default function Equipe() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <h1 className="mr-auto text-2xl font-extrabold">Equipe e leitores de acesso</h1>
-        <button className="btn-primary" onClick={() => setOpen({ id: null, initial: { nome: '', sobrenome: '', categoria: 'STAFF', role: 'scanner', consentimento: false } })}><Plus size={16} /> Novo membro da equipe</button>
+        <button className="btn-primary" onClick={() => setOpen({ id: null, initial: { nome: '', sobrenome: '', categoria: 'STAFF SIRAN SUMMIT', role: 'scanner', consentimento: false } })}><Plus size={16} /> Novo membro da equipe</button>
       </div>
       <div className="card space-y-2 p-4 text-sm text-slate-600">
         <p><b>Como funciona:</b> todo mundo entra com <b>nome.sobrenome</b> e o <b>CPF</b> como senha. O perfil define o que a pessoa vê:</p>

@@ -87,6 +87,7 @@ export default function Painel() {
           </div>
         </div>
       )}
+      {d.dbPath && <p className="text-xs text-slate-400">Banco de dados: <code>{d.dbPath}</code></p>}
     </div>
   );
 }

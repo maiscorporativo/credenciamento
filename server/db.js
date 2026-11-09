@@ -2,14 +2,19 @@ import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import os from 'node:os';
 
 // raiz do projeto, independente da pasta de onde o servidor foi iniciado
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const DATA_DIR = path.resolve(ROOT, process.env.DATA_DIR || 'data');
+// DATA_DIR aceita "~/pasta" (pasta pessoal do usuário no servidor). Na hospedagem, use uma pasta FORA
+// da pasta do app: a cada implantação a pasta do app pode ser recriada e o que estiver dentro dela se perde.
+const rawDir = (process.env.DATA_DIR || 'data').trim();
+export const DATA_DIR = rawDir.startsWith('~') ? path.join(os.homedir(), rawDir.slice(1).replace(/^[\/]+/, '')) : path.resolve(ROOT, rawDir);
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
-export const db = new DatabaseSync(path.join(DATA_DIR, 'credenciamento.db'));
+export const DB_PATH = path.join(DATA_DIR, 'credenciamento.db');
+export const db = new DatabaseSync(DB_PATH);
 db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
 
 db.exec(`

@@ -30,11 +30,16 @@ const GUESS = {
 
 function cfg() {
   const c = getSetting(KEY, {});
-  if (!c.webhookSecret) { c.webhookSecret = crypto.randomBytes(18).toString('base64url'); setSetting(KEY, c); }
+  if (!c.webhookSecret) { c.webhookSecret = process.env.MAUTIC_WEBHOOK_SECRET || crypto.randomBytes(18).toString('base64url'); setSetting(KEY, c); }
   const merged = {
     url: process.env.MAUTIC_URL || '', user: process.env.MAUTIC_USER || '', pass: process.env.MAUTIC_PASS || '',
     forms: [], pollEnabled: false, pollSeconds: 60, mapping: {}, lastIds: {}, aliases: [], status: {}, ...c,
   };
+  // formulários definidos por variável de ambiente (ex.: MAUTIC_FORMS=33:VISITANTE,32:EXPOSITOR) — usados se nada foi salvo na tela
+  if (!c.forms?.length && !c.formId && process.env.MAUTIC_FORMS) {
+    merged.forms = process.env.MAUTIC_FORMS.split(',').map((x) => { const [id, cat] = x.split(':'); return { id: Number(id), categoria: (cat || 'VISITANTE').trim().toUpperCase() }; });
+  }
+  if (c.pollEnabled === undefined && /^(1|true|sim)$/i.test(process.env.MAUTIC_POLL || '')) merged.pollEnabled = true;
   // compatibilidade com a versão de um formulário só
   if (!merged.forms.length && c.formId) merged.forms = [{ id: Number(c.formId), categoria: 'VISITANTE' }];
   merged.forms = merged.forms.map((f) => ({ id: Number(f.id), name: f.name || '', categoria: f.categoria || 'VISITANTE' })).filter((f) => f.id);

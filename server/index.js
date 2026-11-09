@@ -3,7 +3,7 @@ import express from 'express';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'node:fs';
-import { db, getSetting, setSetting, tx, ROOT } from './db.js';
+import { db, getSetting, setSetting, tx, ROOT, DB_PATH } from './db.js';
 import {
   CATEGORIAS, ROLES, onlyDigits, clean, slug, makeLogin, makeBadgeName, makeCode, parseConsent, extractCode,
 } from './util.js';
@@ -375,6 +375,7 @@ app.delete('/api/contacts/:row', ANY, wrap((req, res) => {
 app.get('/api/reports/summary', ADMIN, wrap((req, res) => {
   const one = (sql, ...a) => db.prepare(sql).get(...a);
   res.json({
+    dbPath: DB_PATH,
     inscritos: one('SELECT count(*) n FROM participants').n,
     credenciados: one('SELECT count(*) n FROM participants WHERE checkin_at IS NOT NULL').n,
     impressoes: one('SELECT count(*) n FROM prints').n,
@@ -455,6 +456,7 @@ app.use((e, req, res, _next) => { console.error(e); err(res, 500, e.message || '
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Credenciamento rodando em http://localhost:${PORT}`);
+  console.log(`Banco de dados: ${DB_PATH}`);
   startMauticPolling();
   console.log(`Admin mestre: ${ADMIN_USER} / ${process.env.ADMIN_PASS ? '(definida no .env)' : ADMIN_PASS + '  <- temporária! defina ADMIN_PASS no .env'}`);
 });

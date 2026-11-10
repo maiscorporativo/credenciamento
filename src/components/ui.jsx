@@ -103,17 +103,18 @@ export function ParticipantForm({ value, onChange, admin, areas = [] }) {
       <input className="input" value={value[k] ?? ''} onChange={set(k)} {...rest} />
     </div>
   );
+  const req = value.id ? '' : ' *'; // obrigatórios no novo cadastro
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-      {F({ k: 'nome', label: 'Nome', required: true })}
+      {F({ k: 'nome', label: 'Nome *', required: true })}
       {F({ k: 'sobrenome', label: 'Sobrenome' })}
       {F({ k: 'nome_cracha', label: 'Nome impresso no crachá', className: 'sm:col-span-2', placeholder: 'Ex.: Viviane Pinatti' })}
       {F({ k: 'empresa', label: 'Empresa / propriedade', className: 'sm:col-span-2' })}
       {F({ k: 'cargo', label: 'Cargo' })}
       {F({ k: 'cidade', label: 'Cidade' })}
-      {F({ k: 'email', label: 'E-mail', type: 'email' })}
-      {F({ k: 'whatsapp', label: 'WhatsApp', inputMode: 'tel' })}
-      {F({ k: 'cpf', label: 'CPF (senha de acesso)', inputMode: 'numeric' })}
+      {F({ k: 'email', label: `E-mail${req}`, type: 'email', required: !value.id })}
+      {F({ k: 'whatsapp', label: `WhatsApp / telefone${req}`, inputMode: 'tel', required: !value.id })}
+      {F({ k: 'cpf', label: `CPF (senha de acesso)${req}`, inputMode: 'numeric', required: !value.id })}
       <div>
         <label className="label">Categoria</label>
         <select className="input" value={value.categoria || 'VISITANTE'} onChange={set('categoria')}>

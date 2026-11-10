@@ -221,6 +221,9 @@ app.get('/api/participants/:id', DESK, wrap((req, res) => {
 app.post('/api/participants', DESK, wrap((req, res) => {
   const d = normalizeInput(req.body, req.user);
   if (!d.nome) return err(res, 400, 'Informe o nome.');
+  // novo cadastro: CPF, telefone e e-mail obrigatórios (só preenchidos, sem validar CPF/telefone)
+  const faltando = [!d.cpf && 'CPF', !clean(d.whatsapp) && 'WhatsApp/telefone', !clean(d.email) && 'e-mail'].filter(Boolean);
+  if (faltando.length) return err(res, 400, `Preencha os campos obrigatórios: ${faltando.join(', ')}.`);
   const dup = cpfTaken(d.cpf);
   if (dup) return err(res, 409, `CPF já cadastrado para ${dup.nome} ${dup.sobrenome} (#${dup.id}).`);
   d.nome_cracha ||= makeBadgeName(d.nome, d.sobrenome || '');

@@ -114,7 +114,7 @@ export function ParticipantForm({ value, onChange, admin, areas = [] }) {
       {F({ k: 'cidade', label: 'Cidade' })}
       {F({ k: 'email', label: `E-mail${req}`, type: 'email', required: !value.id })}
       {F({ k: 'whatsapp', label: `WhatsApp / telefone${req}`, inputMode: 'tel', required: !value.id })}
-      {F({ k: 'cpf', label: `CPF (senha de acesso)${req}`, inputMode: 'numeric', required: !value.id })}
+      {F({ k: 'cpf', label: 'CPF (senha de acesso)', inputMode: 'numeric' })}
       <div>
         <label className="label">Categoria</label>
         <select className="input" value={value.categoria || 'VISITANTE'} onChange={set('categoria')}>

@@ -23,25 +23,28 @@ export function refreshSearch(id) {
 export function importRows(rows, { update = false, origem = 'importacao', categoria = '', promote = false } = {}) {
   const stats = { inseridos: 0, atualizados: 0, ignorados: 0, erros: [], novos: [] };
   const findBy = {
-    cpf: db.prepare("SELECT * FROM participants WHERE cpf = ? AND cpf != ''"),
-    ext: db.prepare("SELECT * FROM participants WHERE ext_id = ? AND ext_id != ''"),
+    // CPF igual mesmo se um dos lados perdeu os zeros da frente (Excel)
+    cpf: db.prepare("SELECT * FROM participants WHERE cpf != '' AND (cpf = ? OR ltrim(cpf, '0') = ltrim(?, '0'))"),
+    // ID de inscrição só vale dentro da mesma origem (ID do Mautic ≠ "Id" de uma planilha qualquer)
+    ext: db.prepare("SELECT * FROM participants WHERE ext_id = ? AND ext_id != '' AND origem = ?"),
     email: db.prepare("SELECT * FROM participants WHERE lower(email) = ? AND email != ''"),
   };
   tx(() => {
     rows.forEach((raw, i) => {
       const d = {
         ext_id: clean(raw.ext_id), nome: clean(raw.nome), sobrenome: clean(raw.sobrenome),
-        email: clean(raw.email).toLowerCase(), whatsapp: clean(raw.whatsapp), cpf: onlyDigits(raw.cpf),
+        email: (clean(raw.email).match(/[^\s@]+@[^\s@]+\.[^\s@]+/) || [''])[0].toLowerCase(), whatsapp: clean(raw.whatsapp), cpf: onlyDigits(raw.cpf),
         empresa: clean(raw.empresa), cargo: clean(raw.cargo), cidade: clean(raw.cidade),
         consentimento: parseConsent(raw.consentimento),
       };
+      if (d.cpf.length >= 9 && d.cpf.length < 11) d.cpf = d.cpf.padStart(11, '0'); // Excel apaga zeros da frente
       if (raw.observacoes) d.observacoes = clean(raw.observacoes);
       if (raw.categoria || categoria) d.categoria = clean(raw.categoria || categoria).toUpperCase();
       if (!d.nome && !d.sobrenome) { stats.ignorados++; return; }
       if (!d.nome) { d.nome = d.sobrenome; d.sobrenome = ''; }
       // mesmo ID ou e-mail, mas CPF diferente = outra pessoa (ex.: mãe e filha com o mesmo e-mail)
       const samePerson = (p) => p && !(d.cpf && p.cpf && p.cpf !== d.cpf) ? p : null;
-      const existing = (d.cpf && findBy.cpf.get(d.cpf)) || (d.ext_id && samePerson(findBy.ext.get(d.ext_id))) || (d.email && samePerson(findBy.email.get(d.email)));
+      const existing = (d.cpf && findBy.cpf.get(d.cpf, d.cpf)) || (d.ext_id && samePerson(findBy.ext.get(d.ext_id, origem))) || (d.email && samePerson(findBy.email.get(d.email)));
       if (existing) {
         // visitante que também se inscreveu como expositor (ou outra categoria): promove, sem mexer no resto
         if (promote && d.categoria && d.categoria !== 'VISITANTE' && existing.categoria === 'VISITANTE') {
@@ -53,6 +56,7 @@ export function importRows(rows, { update = false, origem = 'importacao', catego
         }
         if (!update) { stats.ignorados++; return; }
         const keys = Object.keys(d).filter((k) => d[k] !== '' && k !== 'categoria');
+        if (!d.email && existing.email && !existing.email.includes('@')) keys.push('email'); // limpa "não tem" etc.
         db.prepare(`UPDATE participants SET ${keys.map((k) => `${k} = ?`).join(', ')}, login = ?, updated_at = ? WHERE id = ?`)
           .run(...keys.map((k) => d[k]), makeLogin(d.nome, d.sobrenome), now(), existing.id);
         refreshSearch(existing.id);

@@ -39,7 +39,9 @@ export function importRows(rows, { update = false, origem = 'importacao', catego
       if (raw.categoria || categoria) d.categoria = clean(raw.categoria || categoria).toUpperCase();
       if (!d.nome && !d.sobrenome) { stats.ignorados++; return; }
       if (!d.nome) { d.nome = d.sobrenome; d.sobrenome = ''; }
-      const existing = (d.cpf && findBy.cpf.get(d.cpf)) || (d.ext_id && findBy.ext.get(d.ext_id)) || (d.email && findBy.email.get(d.email));
+      // mesmo ID ou e-mail, mas CPF diferente = outra pessoa (ex.: mãe e filha com o mesmo e-mail)
+      const samePerson = (p) => p && !(d.cpf && p.cpf && p.cpf !== d.cpf) ? p : null;
+      const existing = (d.cpf && findBy.cpf.get(d.cpf)) || (d.ext_id && samePerson(findBy.ext.get(d.ext_id))) || (d.email && samePerson(findBy.email.get(d.email)));
       if (existing) {
         // visitante que também se inscreveu como expositor (ou outra categoria): promove, sem mexer no resto
         if (promote && d.categoria && d.categoria !== 'VISITANTE' && existing.categoria === 'VISITANTE') {

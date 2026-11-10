@@ -13,6 +13,7 @@ const TARGETS = [
   { key: 'cargo', label: 'Cargo', guess: ['cargo', 'funcao'] },
   { key: 'cidade', label: 'Cidade', guess: ['cidade', 'municipio'] },
   { key: 'categoria', label: 'Categoria', guess: ['categoria', 'tipo', 'perfil'] },
+  { key: 'observacoes', label: 'Observações', guess: ['observ', 'grupo', 'obs'] },
   { key: 'consentimento', label: 'Autoriza compartilhar dados', guess: ['autorizo', 'compartilhamento', 'consentimento', 'lgpd'] },
 ];
 const norm = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();

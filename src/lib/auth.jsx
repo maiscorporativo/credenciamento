@@ -27,9 +27,11 @@ export function AuthProvider({ children }) {
     setToken(null);
     setUser(null);
   };
+  // entra direto com uma sessão já criada pelo servidor (ex.: logo após a autoinscrição)
+  const adopt = (token, u) => { setToken(token); setUser(u); };
   const refresh = () => api('/me').then((d) => setUser(d.user));
 
-  return <Ctx.Provider value={{ user, meta, ready, login, logout, refresh, reloadMeta: loadMeta }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ user, meta, ready, login, logout, adopt, refresh, reloadMeta: loadMeta }}>{children}</Ctx.Provider>;
 }
 
 export const useAuth = () => useContext(Ctx);

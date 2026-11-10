@@ -4,6 +4,7 @@ import { api } from '../../lib/api';
 import { useAuth } from '../../lib/auth';
 import { FIELDS, SAMPLE, SIZE_PRESETS, printCalibration, printLabels } from '../../lib/label';
 import { LabelPreview, useLabelTemplate } from '../../components/ui';
+import SignupLink from './SignupLink';
 import { DEFAULT_LABEL } from '../../../server/defaults.js';
 
 const MM = 96 / 25.4;
@@ -293,6 +294,8 @@ export default function Etiqueta() {
             </div>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="accent-brand-700" checked={event.autoPrint !== false} onChange={(e) => setEvent({ ...event, autoPrint: e.target.checked })} /> Imprimir automaticamente ao cadastrar no balcão</label>
           </div>
+
+          <SignupLink event={event} setEvent={setEvent} />
         </div>
       </div>
     </div>

@@ -51,3 +51,11 @@ export function formatCpf(d) {
   const x = onlyDigits(d);
   return x.length === 11 ? `${x.slice(0, 3)}.${x.slice(3, 6)}.${x.slice(6, 9)}-${x.slice(9)}` : x;
 }
+
+/** CPF válido (dígitos verificadores) */
+export function validCpf(c) {
+  const d = onlyDigits(c);
+  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+  const dv = (len) => { let s = 0; for (let i = 0; i < len; i++) s += Number(d[i]) * (len + 1 - i); const r = (s * 10) % 11; return r === 10 ? 0 : r; };
+  return dv(9) === Number(d[9]) && dv(10) === Number(d[10]);
+}

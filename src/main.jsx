@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import './index.css';
 import { AuthProvider, homeFor, useAuth } from './lib/auth';
 import Login from './pages/Login';
+import Inscricao from './pages/Inscricao';
 import AdminLayout from './components/AdminLayout';
 import Painel from './pages/admin/Painel';
 import Participantes from './pages/admin/Participantes';
@@ -39,6 +40,7 @@ createRoot(document.getElementById('root')).render(
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/inscricao" element={<Inscricao />} />
           <Route path="/c/:code" element={<Guard><CodeLink /></Guard>} />
           <Route path="/balcao" element={<Guard roles={['admin', 'balcao']}><Balcao /></Guard>} />
           <Route path="/app/*" element={<Guard><AppHome /></Guard>} />

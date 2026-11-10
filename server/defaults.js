@@ -25,4 +25,6 @@ export const DEFAULT_EVENT = {
   // que abre o sistema direto na tela de salvar contato / registrar acesso.
   qrBaseUrl: '',
   autoPrint: true,
+  // formulário público de autoinscrição (/inscricao)
+  inscricaoAberta: true,
 };

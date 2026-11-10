@@ -5,7 +5,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { db, getSetting, setSetting, tx, ROOT, DB_PATH } from './db.js';
 import {
-  CATEGORIAS, ROLES, onlyDigits, clean, slug, makeLogin, makeBadgeName, makeCode, parseConsent, extractCode,
+  CATEGORIAS, ROLES, onlyDigits, clean, slug, makeLogin, makeBadgeName, makeCode, parseConsent, extractCode, validCpf,
 } from './util.js';
 import { DEFAULT_LABEL, DEFAULT_EVENT } from './defaults.js';
 import { importRows, refreshSearch, uniqueCode } from './importer.js';
@@ -94,6 +94,43 @@ app.post('/api/login', wrap((req, res) => {
   loginAttempts.delete(ip);
   const user = pid == null ? { id: null, nome: 'Administrador', role: 'admin', master: true } : full(db.prepare('SELECT * FROM participants WHERE id = ?').get(pid));
   res.json({ token, user });
+}));
+
+// ---------------------------------------------------------------- autoinscrição pública (/inscricao)
+const signupAttempts = new Map();
+app.post('/api/inscricao', wrap((req, res) => {
+  const ev = getSetting('event', DEFAULT_EVENT);
+  if (ev.inscricaoAberta === false) return err(res, 403, 'As inscrições por este formulário estão encerradas. Procure o balcão de credenciamento.');
+  const ip = req.ip;
+  const a = signupAttempts.get(ip) || { n: 0, t: Date.now() };
+  if (Date.now() - a.t > 10 * 60_000) { a.n = 0; a.t = Date.now(); }
+  if (a.n >= 40) return err(res, 429, 'Muitas inscrições seguidas deste aparelho. Aguarde alguns minutos.');
+  a.n++; signupAttempts.set(ip, a);
+
+  const b = req.body || {};
+  const d = {
+    nome: clean(b.nome), sobrenome: clean(b.sobrenome), cpf: onlyDigits(b.cpf), email: clean(b.email).toLowerCase(),
+    whatsapp: clean(b.whatsapp), empresa: clean(b.empresa), cargo: clean(b.cargo), cidade: clean(b.cidade),
+  };
+  for (const k of Object.keys(d)) d[k] = d[k].slice(0, 120);
+  d.consentimento = b.consentimento ? 1 : 0;
+  if (!d.nome || !d.sobrenome) return err(res, 400, 'Informe seu nome e sobrenome.');
+  if (!validCpf(d.cpf)) return err(res, 400, 'CPF inválido. Confira os números.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) return err(res, 400, 'E-mail inválido.');
+  if (onlyDigits(d.whatsapp).length < 10) return err(res, 400, 'Informe o WhatsApp com DDD.');
+  if (cpfTaken(d.cpf)) return err(res, 409, 'Este CPF já está inscrito. Entre no sistema usando o CPF como login e como senha.');
+
+  d.nome_cracha = makeBadgeName(d.nome, d.sobrenome);
+  d.login = makeLogin(d.nome, d.sobrenome);
+  d.code = uniqueCode();
+  d.origem = 'autoinscricao';
+  d.categoria = 'VISITANTE';
+  const keys = Object.keys(d);
+  const r = db.prepare(`INSERT INTO participants(${keys.join(',')}) VALUES(${keys.map(() => '?').join(',')})`).run(...keys.map((k) => d[k]));
+  refreshSearch(r.lastInsertRowid);
+  const token = crypto.randomBytes(32).toString('hex');
+  db.prepare('INSERT INTO sessions(token, participant_id, role) VALUES(?,?,?)').run(token, r.lastInsertRowid, 'participante');
+  res.json({ token, user: full(db.prepare('SELECT * FROM participants WHERE id = ?').get(r.lastInsertRowid)) });
 }));
 
 app.get('/api/me', ANY, (req, res) => res.json({ user: req.user }));
